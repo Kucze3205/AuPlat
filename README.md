@@ -1,50 +1,198 @@
-# Welcome to your Expo app 👋
+# AuctionPlat
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A full-stack auction platform with a **React Native** (Expo) mobile client and an **Express + Firebase** backend. Users can register as buyers or sellers, create timed auctions, and place bids in real time.
 
-## Get started
+---
 
-1. Install dependencies
+## Tech Stack
 
-   ```bash
-   npm install
-   ```
+| Layer      | Technology                                          |
+| ---------- | --------------------------------------------------- |
+| Mobile App | React Native 0.81, Expo 54, Expo Router, TypeScript |
+| Backend    | Express 5, TypeScript, Zod validation               |
+| Auth       | Firebase Authentication (ID tokens + custom claims)  |
+| Database   | Cloud Firestore (Firebase Admin SDK)                |
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Project Structure
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+├── app/                  # Expo Router screens (file-based routing)
+│   ├── (tabs)/           # Tab navigation (Home, Auctions, Explore)
+│   └── _layout.tsx       # Root layout
+├── components/           # Reusable UI components
+├── config/               # Client-side Firebase config
+├── constants/            # Theme & design tokens
+├── hooks/                # Custom React hooks
+├── services/
+│   └── api.ts            # API client – auth, auctions, bids
+├── server/
+│   └── src/
+│       ├── index.ts      # Express entry point
+│       ├── routes/       # /api/auth, /api/auctions
+│       ├── controllers/  # Request handlers
+│       ├── schemas/      # Zod request validation
+│       ├── middleware/    # Firebase token auth, error handler
+│       ├── config/       # env vars, Firebase Admin init
+│       ├── data/         # In-memory data store
+│       └── types/        # Shared TypeScript interfaces
+└── assets/               # Images, icons, splash screen
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Prerequisites
 
-To learn more about developing your project with Expo, look at the following resources:
+- **Node.js** ≥ 18
+- **npm** (or yarn/pnpm)
+- A **Firebase** project with Authentication and Firestore enabled
+- Firebase Admin SDK service-account JSON file (placed at project root)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/) (`npx expo`)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## Getting Started
 
-Join our community of developers creating universal apps.
+### 1. Clone & install
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+git clone <repo-url>
+cd AuctionPlat
+
+# Client dependencies
+npm install
+
+# Server dependencies
+cd server
+npm install
+cd ..
+```
+
+### 2. Configure environment
+
+Create `server/.env`:
+
+```env
+PORT=3000
+NODE_ENV=development
+# Optional – path or JSON string of your service-account key
+FIREBASE_SERVICE_ACCOUNT=
+```
+
+Make sure your Firebase service-account JSON (`auctionplat-*-firebase-adminsdk-*.json`) is in the project root, or set the env variable above.
+
+### 3. Start the server
+
+```bash
+cd server
+npm run dev          # starts with ts-node in watch mode on port 3000
+```
+
+### 4. Start the mobile app
+
+```bash
+# From project root
+npx expo start
+```
+
+Then open the app on:
+- **Android emulator** — press `a`
+- **iOS simulator** — press `i`
+- **Expo Go** — scan the QR code
+
+> The API client automatically resolves `localhost` vs `10.0.2.2` based on the platform.
+
+---
+
+## API Reference
+
+All routes are prefixed with `/api`. Protected routes require a `Bearer <Firebase ID Token>` header.
+
+### Auth
+
+| Method | Endpoint         | Auth | Description                      |
+| ------ | ---------------- | ---- | -------------------------------- |
+| POST   | `/auth/register` | No   | Create account (buyer or seller) |
+| GET    | `/auth/me`       | Yes  | Get current user profile         |
+
+### Auctions
+
+| Method | Endpoint                | Auth | Description                       |
+| ------ | ----------------------- | ---- | --------------------------------- |
+| GET    | `/auctions`             | No   | List all auctions (newest first)  |
+| GET    | `/auctions/auction/:id` | No   | Get a single auction by ID        |
+| POST   | `/auctions/auction/`    | Yes  | Create an auction (sellers only)  |
+| POST   | `/auctions/auction/:id/bid` | Yes | Place a bid on an auction     |
+
+### Health Check
+
+```
+GET /health  →  { "status": "ok", "timestamp": "..." }
+```
+
+---
+
+## Data Models
+
+### User
+
+| Field       | Type                  |
+| ----------- | --------------------- |
+| id          | `string` (Firebase UID) |
+| email       | `string`              |
+| role        | `'buyer' \| 'seller'` |
+| createdAt   | `string` (ISO 8601)   |
+
+### Auction
+
+| Field         | Type             |
+| ------------- | ---------------- |
+| id            | `string` (UUID)  |
+| title         | `string`         |
+| description   | `string`         |
+| startingPrice | `number`         |
+| currentPrice  | `number`         |
+| sellerId      | `string`         |
+| bids          | `AuctionBid[]`   |
+| endsAt        | `string` (ISO)   |
+| createdAt     | `string` (ISO)   |
+
+### AuctionBid
+
+| Field     | Type            |
+| --------- | --------------- |
+| id        | `string` (UUID) |
+| bidderId  | `string`        |
+| amount    | `number`        |
+| createdAt | `string` (ISO)  |
+
+---
+
+## Available Scripts
+
+### Client (project root)
+
+| Script              | Description                        |
+| ------------------- | ---------------------------------- |
+| `npm start`         | Start Expo dev server              |
+| `npm run android`   | Start on Android emulator          |
+| `npm run ios`       | Start on iOS simulator             |
+| `npm run web`       | Start in browser                   |
+| `npm run lint`      | Run ESLint                         |
+
+### Server (`server/`)
+
+| Script           | Description                            |
+| ---------------- | -------------------------------------- |
+| `npm run dev`    | Start in dev mode (ts-node + watch)    |
+| `npm run build`  | Compile TypeScript to `dist/`          |
+| `npm start`      | Run compiled JS from `dist/`           |
+| `npm run seed`   | Seed Firestore with sample data        |
+| `npm run lint`   | Type-check without emitting            |
+
+---
+
+## License
+
+MIT
