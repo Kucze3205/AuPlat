@@ -1,5 +1,6 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 
 // Replace these with your actual Firebase project config
 // You can find this in: Firebase Console → Project Settings → General → Your apps → Web app
@@ -15,3 +16,4 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 export const auth = getAuth(app);
+export const storage = getStorage(app);

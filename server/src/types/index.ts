@@ -5,6 +5,7 @@ export interface User {
   email: string;
   passwordHash: string;
   role: UserRole;
+  profilePicture?: string;
   createdAt: Date;
 }
 
@@ -19,6 +20,7 @@ export interface Auction {
   id: string;
   title: string;
   description: string;
+  imageUrl?: string;
   startingPrice: number;
   currentPrice: number;
   sellerId: string;

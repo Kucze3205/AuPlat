@@ -1,8 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
+import { z } from 'zod';
 import { adminAuth, db } from '../config/firebase.js';
 import { HttpError } from '../middleware/error-handler.js';
-import { registerSchema } from '../schemas/auth.js';
+import { googleLoginSchema, registerSchema } from '../schemas/auth.js';
 import { UserRole } from '../types/index.js';
+
+const updateProfilePictureSchema = z.object({
+  profilePicture: z.string().url(),
+});
 
 /**
  * Register — creates a Firebase Auth user and stores the role in Firestore.
@@ -70,6 +75,82 @@ export const me = async (req: Request, res: Response, next: NextFunction) => {
       user: {
         id: req.user.userId,
         ...userDoc.data(),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Sync profile for Google/Firebase social login.
+ * Requires a valid Firebase ID token and creates profile on first login.
+ */
+export const googleLogin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+
+    const data = googleLoginSchema.parse(req.body ?? {});
+    const userId = req.user.userId;
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
+
+    if (userDoc.exists) {
+      return res.json({
+        user: {
+          id: userId,
+          ...userDoc.data(),
+        },
+      });
+    }
+
+    const firebaseUser = await adminAuth.getUser(userId);
+    const role: UserRole = data.role ?? 'buyer';
+    const createdAt = new Date().toISOString();
+
+    await userRef.set({
+      email: firebaseUser.email ?? '',
+      role,
+      createdAt,
+    });
+
+    await adminAuth.setCustomUserClaims(userId, { role });
+
+    return res.status(201).json({
+      user: {
+        id: userId,
+        email: firebaseUser.email ?? '',
+        role,
+        createdAt,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update user profile picture URL.
+ */
+export const updateProfilePicture = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    const data = updateProfilePictureSchema.parse(req.body);
+    const userRef = db.collection('users').doc(req.user.userId);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) {
+      throw new HttpError(404, 'User profile not found');
+    }
+    await userRef.update({ profilePicture: data.profilePicture });
+    return res.json({
+      user: {
+        id: req.user.userId,
+        ...userDoc.data(),
+        profilePicture: data.profilePicture,
       },
     });
   } catch (error) {

@@ -1,98 +1,136 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { AuctionCard } from '@/components/auction-card';
+import { AuthModal } from '@/components/auth-modal';
+import { CreateAuctionModal } from '@/components/create-auction-modal';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { Toast } from '@/components/toast';
+import { Colors } from '@/constants/theme';
+import { useAuth } from '@/hooks/use-auth';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Auction, fetchAuctions, getErrorMessage, logout } from '@/services/api';
 
-export default function HomeScreen() {
+export default function AuctionsScreen() {
+  const scheme = useColorScheme() ?? 'light';
+  const router = useRouter();
+  const { user, setUser } = useAuth();
+  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadAuctions = useCallback(async () => {
+    try {
+      setError(null);
+      setAuctions(await fetchAuctions());
+    } catch (e) {
+      setError(getErrorMessage(e));
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAuctions().finally(() => setLoading(false));
+  }, [loadAuctions]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadAuctions();
+    setRefreshing(false);
+  };
+
+  const handleNewAuction = () => {
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+    if (user.role !== 'seller') {
+      setError('Permission denied: Only sellers can create auctions.');
+      return;
+    }
+    setShowCreate(true);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ThemedView style={styles.container}>
+      <View style={[styles.header, { borderBottomColor: Colors[scheme].icon }]}>
+        <ThemedText type="title">Auctions</ThemedText>
+        {user ? (
+          <Pressable onPress={() => { logout(); setUser(null); }}>
+            <ThemedText type="link">{user.email} (logout)</ThemedText>
+          </Pressable>
+        ) : (
+          <Pressable onPress={() => setShowAuth(true)}>
+            <ThemedText type="link">Login</ThemedText>
+          </Pressable>
+        )}
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      {loading ? (
+        <ActivityIndicator size="large" style={{ marginTop: 40 }} color={Colors[scheme].tint} />
+      ) : (
+        <FlatList
+          data={auctions}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <AuctionCard
+              auction={item}
+              onPress={() => router.push({ pathname: '/auction/[id]', params: { id: item.id } })}
+            />
+          )}
+          contentContainerStyle={styles.list}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListEmptyComponent={
+            <ThemedText style={styles.empty}>No auctions yet. Be the first to create one!</ThemedText>
+          }
+        />
+      )}
+
+      <Pressable style={[styles.fab, { backgroundColor: Colors[scheme].tint }]} onPress={handleNewAuction}>
+        <ThemedText style={styles.fabText}>+</ThemedText>
+      </Pressable>
+
+      <CreateAuctionModal visible={showCreate} onClose={() => setShowCreate(false)} onCreated={loadAuctions} />
+      <AuthModal visible={showAuth} onClose={() => setShowAuth(false)} onAuth={setUser} />
+      <Toast message={error} onDismiss={() => setError(null)} />
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: { flex: 1, paddingTop: 50 },
+  header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  list: { padding: 16, gap: 12 },
+  empty: { textAlign: 'center', marginTop: 40, opacity: 0.6 },
+  fab: {
     position: 'absolute',
+    bottom: 30,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)',
   },
+  fabText: { color: '#fff', fontSize: 28, lineHeight: 30, fontWeight: '700' },
 });
