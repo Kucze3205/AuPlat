@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   inner: {
     backgroundColor: '#1e1e2e',
-    borderRadius: 14,
+    borderRadius: 4,
     paddingVertical: 14,
     paddingHorizontal: 18,
     flexDirection: 'row',

@@ -234,12 +234,12 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: 13,
-    backgroundColor: '#0a7ea4', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#ea7a1f', justifyContent: 'center', alignItems: 'center',
     borderWidth: 2, borderColor: '#fff',
   },
   badgeText: { color: '#fff', fontSize: 13, fontWeight: '700' },
   btn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
-  btnPrimary: { backgroundColor: '#0a7ea4' },
+  btnPrimary: { backgroundColor: '#ea7a1f' },
   btnCancel: { backgroundColor: 'transparent' },
 });
 
@@ -249,7 +249,7 @@ const cropStyles = StyleSheet.create({
   viewportOuter: { width: 260, height: 260, borderRadius: 130, backgroundColor: '#000' },
   viewport: { width: 260, height: 260, borderRadius: 130, overflow: 'hidden' },
   zoomRow: { flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 16, marginBottom: 16 },
-  zoomBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#0a7ea4', justifyContent: 'center', alignItems: 'center' },
+  zoomBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#ea7a1f', justifyContent: 'center', alignItems: 'center' },
   zoomBtnText: { color: '#fff', fontSize: 20, fontWeight: '700', lineHeight: 22 },
   btnRow: { flexDirection: 'row', gap: 12 },
 });

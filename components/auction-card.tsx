@@ -52,10 +52,10 @@ export function AuctionCard({ auction, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 12, padding: 16, borderWidth: 1 },
+  card: { borderRadius: 3, padding: 16, borderWidth: 1 },
   body: { flexDirection: 'row', gap: 12 },
   info: { flex: 1, gap: 4 },
-  image: { width: 100, height: 100, borderRadius: 8, backgroundColor: '#f0f0f0' },
+  image: { width: 100, height: 100, borderRadius: 3, backgroundColor: '#f0f0f0' },
   title: { marginBottom: 2 },
   desc: { opacity: 0.7 },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },

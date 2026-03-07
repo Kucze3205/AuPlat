@@ -126,7 +126,7 @@ export default function ProfileScreen() {
   return (
     <ThemedView style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.pageContent, styles.scroll]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {error && (
@@ -213,9 +213,10 @@ export default function ProfileScreen() {
 // ─── Styles ─────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 50 },
+  container: { flex: 1, paddingTop: 70 },
   center: { justifyContent: 'center', alignItems: 'center', padding: 24 },
-  scroll: { padding: 16, paddingBottom: 40 },
+  pageContent: { width: '100%', maxWidth: 960, alignSelf: 'center' },
+  scroll: { paddingHorizontal: 32, paddingVertical: 16, paddingBottom: 40 },
   profileHeader: {
     alignItems: 'center',
     paddingBottom: 20,
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   email: { fontSize: 20, marginBottom: 6 },
-  rolePill: { borderWidth: 1.5, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 3, marginBottom: 8 },
+  rolePill: { borderWidth: 1.5, borderRadius: 3, paddingHorizontal: 12, paddingVertical: 3, marginBottom: 8 },
   roleText: { fontSize: 12, fontWeight: '700', letterSpacing: 1 },
   memberSince: { fontSize: 13, opacity: 0.5 },
   statsRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginBottom: 24 },
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, marginTop: 8 },
   sectionCount: { fontSize: 14, opacity: 0.5 },
   emptyText: { textAlign: 'center', opacity: 0.5, marginBottom: 16 },
-  logoutBtn: { borderWidth: 1.5, borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 24 },
-  btn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
-  btnPrimary: { backgroundColor: '#0a7ea4' },
+  logoutBtn: { borderWidth: 1.5, borderRadius: 3, paddingVertical: 12, alignItems: 'center', marginTop: 24 },
+  btn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 3, alignItems: 'center' },
+  btnPrimary: { backgroundColor: '#ea7a1f' },
 });

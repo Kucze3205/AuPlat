@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   content: {
-    borderRadius: 16,
+    borderRadius: 4,
     padding: 24,
   },
   title: {
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 3,
     padding: 12,
     marginBottom: 10,
     fontSize: 16,
@@ -253,15 +253,15 @@ const styles = StyleSheet.create({
   btn: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 3,
     alignItems: 'center',
   },
   btnPrimary: {
-    backgroundColor: '#0a7ea4',
+    backgroundColor: '#ea7a1f',
   },
   googleBtn: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 3,
     paddingVertical: 12,
     alignItems: 'center',
     marginTop: 10,
@@ -278,11 +278,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 3,
     borderWidth: 1,
-    borderColor: '#0a7ea4',
+    borderColor: '#ea7a1f',
   },
   roleBtnActive: {
-    backgroundColor: '#0a7ea4',
+    backgroundColor: '#ea7a1f',
   },
 });

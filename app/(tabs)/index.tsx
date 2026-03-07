@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -15,15 +15,14 @@ import { CreateAuctionModal } from '@/components/create-auction-modal';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Toast } from '@/components/toast';
-import { Colors } from '@/constants/theme';
+import { useAuctionSearch } from '@/hooks/auction-search';
 import { useAuth } from '@/hooks/use-auth';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Auction, fetchAuctions, getErrorMessage, logout } from '@/services/api';
+import { Auction, fetchAuctions, getErrorMessage } from '@/services/api';
 
 export default function AuctionsScreen() {
-  const scheme = useColorScheme() ?? 'light';
   const router = useRouter();
   const { user, setUser } = useAuth();
+  const { searchQuery } = useAuctionSearch();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -50,6 +49,15 @@ export default function AuctionsScreen() {
     setRefreshing(false);
   };
 
+  const filteredAuctions = useMemo(() => {
+    if (!searchQuery) return auctions;
+    return auctions.filter((auction) => {
+      const title = auction.title.toLowerCase();
+      const description = auction.description.toLowerCase();
+      return title.includes(searchQuery) || description.includes(searchQuery);
+    });
+  }, [auctions, searchQuery]);
+
   const handleNewAuction = () => {
     if (!user) {
       setShowAuth(true);
@@ -64,24 +72,11 @@ export default function AuctionsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.header, { borderBottomColor: Colors[scheme].icon }]}>
-        <ThemedText type="title">Auctions</ThemedText>
-        {user ? (
-          <Pressable onPress={() => { logout(); setUser(null); }}>
-            <ThemedText type="link">{user.email} (logout)</ThemedText>
-          </Pressable>
-        ) : (
-          <Pressable onPress={() => setShowAuth(true)}>
-            <ThemedText type="link">Login</ThemedText>
-          </Pressable>
-        )}
-      </View>
-
       {loading ? (
-        <ActivityIndicator size="large" style={{ marginTop: 40 }} color={Colors[scheme].tint} />
+        <ActivityIndicator size="large" style={{ marginTop: 40 }} color="#ea7a1f" />
       ) : (
         <FlatList
-          data={auctions}
+          data={filteredAuctions}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <AuctionCard
@@ -89,48 +84,64 @@ export default function AuctionsScreen() {
               onPress={() => router.push({ pathname: '/auction/[id]', params: { id: item.id } })}
             />
           )}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.pageContent, styles.list]}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
-            <ThemedText style={styles.empty}>No auctions yet. Be the first to create one!</ThemedText>
+            <ThemedText style={styles.empty}>
+              {searchQuery ? 'No auctions match your search.' : 'No auctions yet. Be the first to create one!'}
+            </ThemedText>
           }
         />
       )}
 
-      <Pressable style={[styles.fab, { backgroundColor: Colors[scheme].tint }]} onPress={handleNewAuction}>
-        <ThemedText style={styles.fabText}>+</ThemedText>
+      <Pressable
+        style={({ pressed }) => [
+          styles.fab,
+          { backgroundColor: '#ea7a1f', opacity: pressed ? 0.85 : 1 },
+        ]}
+        onPress={handleNewAuction}
+      >
+        <View style={styles.fabIconWrap}>
+          <ThemedText style={styles.fabIcon}>+</ThemedText>
+        </View>
+        <ThemedText style={styles.fabLabel}>New Auction</ThemedText>
       </Pressable>
 
       <CreateAuctionModal visible={showCreate} onClose={() => setShowCreate(false)} onCreated={loadAuctions} />
       <AuthModal visible={showAuth} onClose={() => setShowAuth(false)} onAuth={setUser} />
+      
       <Toast message={error} onDismiss={() => setError(null)} />
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 50 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  list: { padding: 16, gap: 12 },
+  container: { flex: 1, paddingTop: 70 },
+  pageContent: { width: '100%', maxWidth: 960, alignSelf: 'center' },
+  list: { paddingHorizontal: 32, paddingVertical: 16, gap: 12 },
   empty: { textAlign: 'center', marginTop: 40, opacity: 0.6 },
   fab: {
     position: 'absolute',
     bottom: 30,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    right: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+    paddingLeft: 4,
+    paddingRight: 18,
+    borderRadius: 3,
+    elevation: 6,
+    boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.28)',
+  },
+  fabIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 3,
+    backgroundColor: '#ea7a1f',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 6,
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)',
   },
-  fabText: { color: '#fff', fontSize: 28, lineHeight: 30, fontWeight: '700' },
+  fabIcon: { color: '#fff', fontSize: 24, lineHeight: 24, fontWeight: '700' },
+  fabLabel: { color: '#fff', fontSize: 15, fontWeight: '700', letterSpacing: 0.3 },
 });

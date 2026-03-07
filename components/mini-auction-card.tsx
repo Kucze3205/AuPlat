@@ -49,11 +49,11 @@ export function MiniAuctionCard({ auction, label, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderRadius: 10, padding: 12, marginBottom: 10 },
+  card: { borderWidth: 1, borderRadius: 3, padding: 12, marginBottom: 10 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   price: { fontWeight: '600' },
   bids: { fontSize: 12, opacity: 0.4, marginTop: 2 },
-  badge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, marginLeft: 8 },
+  badge: { borderRadius: 3, paddingHorizontal: 8, paddingVertical: 2, marginLeft: 8 },
   badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
 });

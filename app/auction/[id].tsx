@@ -138,7 +138,7 @@ export default function AuctionDetailsScreen() {
   return (
     <ThemedView style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.pageContent, styles.scroll]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {auction.imageUrl && (
@@ -269,15 +269,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  pageContent: {
+    width: '100%',
+    maxWidth: 960,
+    alignSelf: 'center',
+  },
   scroll: {
-    padding: 16,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
     paddingBottom: 40,
     gap: 14,
   },
   heroImage: {
     width: '100%',
     height: 240,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: '#e5e5e5',
   },
   title: {
@@ -296,7 +302,7 @@ const styles = StyleSheet.create({
   metaCard: {
     borderWidth: 1,
     borderColor: '#cfd6dd',
-    borderRadius: 12,
+    borderRadius: 3,
     padding: 12,
     gap: 8,
   },
@@ -325,31 +331,31 @@ const styles = StyleSheet.create({
   bidInput: {
     flex: 1,
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 3,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
   },
   button: {
-    borderRadius: 10,
+    borderRadius: 3,
     paddingHorizontal: 16,
     paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   bidButton: {
-    backgroundColor: '#0a7ea4',
+    backgroundColor: '#ea7a1f',
     minWidth: 72,
   },
   editButton: {
-    backgroundColor: '#0a7ea4',
+    backgroundColor: '#ea7a1f',
     alignSelf: 'flex-start',
   },
   bidButtonText: {
     color: '#fff',
   },
   retryButton: {
-    backgroundColor: '#0a7ea4',
+    backgroundColor: '#ea7a1f',
     marginTop: 16,
   },
   retryButtonText: {
