@@ -30,6 +30,8 @@ function TabsShell() {
   const { searchInput, setSearchInput, applySearch, clearSearch } = useAuctionSearch();
   const [showAuth, setShowAuth] = useState(false);
   const shellWidth = Math.min(Math.max(width - 24, 320), 1200);
+  const compactNav = shellWidth < 1080;
+  const crampedNav = shellWidth < 860;
 
   const toggleThemeMode = () => {
     setThemeMode(themeMode === 'light' ? 'dark' : 'light');
@@ -50,8 +52,21 @@ function TabsShell() {
             right: 0,
           },
         ]}>
-        <View style={[styles.topBarInner, { width: shellWidth }]}>
-          <View style={styles.leftSection}>
+        <View
+          style={[
+            styles.topBarInner,
+            {
+              width: shellWidth,
+              paddingHorizontal: compactNav ? 12 : 20,
+            },
+          ]}>
+          <View
+            style={[
+              styles.leftSection,
+              {
+                width: crampedNav ? 132 : compactNav ? 160 : 220,
+              },
+            ]}>
             <Pressable
               onPress={() => {
                 clearSearch();
@@ -61,8 +76,14 @@ function TabsShell() {
             </Pressable>
           </View>
 
-          <View style={styles.centerSection}>
-            <View style={styles.searchRow}>
+          <View
+            style={[
+              styles.centerSection,
+              {
+                maxWidth: crampedNav ? 360 : compactNav ? 440 : 560,
+              },
+            ]}>
+            <View style={[styles.searchRow, { gap: crampedNav ? 4 : 8 }]}> 
               <TextInput
                 style={[
                   styles.searchInput,
@@ -80,16 +101,28 @@ function TabsShell() {
                 returnKeyType="search"
               />
               <Pressable
-                style={({ pressed }) => [styles.searchBtn, { opacity: pressed ? 0.85 : 1 }]}
+                style={({ pressed }) => [
+                  styles.searchBtn,
+                  {
+                    opacity: pressed ? 0.85 : 1,
+                    paddingHorizontal: crampedNav ? 10 : 14,
+                  },
+                ]}
                 onPress={applySearch}>
-                <ThemedText style={styles.searchBtnText}>Search</ThemedText>
+                <ThemedText style={styles.searchBtnText}>{crampedNav ? 'Go' : 'Search'}</ThemedText>
               </Pressable>
             </View>
           </View>
 
-          <View style={styles.rightSection}>
+          <View style={[styles.rightSection, { gap: crampedNav ? 4 : 8 }]}> 
             <Pressable
-              style={styles.navButton}
+              style={[
+                styles.navButton,
+                {
+                  gap: crampedNav ? 0 : 6,
+                  paddingHorizontal: crampedNav ? 4 : compactNav ? 6 : 8,
+                },
+              ]}
               onPress={() => router.replace('/(tabs)/cart')}>
               <View style={styles.cartIconWrap}>
                 <IconSymbol
@@ -103,18 +136,26 @@ function TabsShell() {
                   </View>
                 )}
               </View>
-              <ThemedText
-                numberOfLines={1}
-                style={[
-                  styles.navLabel,
-                  { color: isOnCart ? Colors[scheme].tint : Colors[scheme].tabIconDefault },
-                ]}>
-                Basket
-              </ThemedText>
+              {!crampedNav && (
+                <ThemedText
+                  numberOfLines={1}
+                  style={[
+                    styles.navLabel,
+                    { color: isOnCart ? Colors[scheme].tint : Colors[scheme].tabIconDefault },
+                  ]}>
+                  Basket
+                </ThemedText>
+              )}
             </Pressable>
 
             <Pressable
-              style={styles.navButton}
+              style={[
+                styles.navButton,
+                {
+                  gap: crampedNav ? 0 : 6,
+                  paddingHorizontal: crampedNav ? 4 : compactNav ? 6 : 8,
+                },
+              ]}
               onPress={() => {
                 if (!user) {
                   setShowAuth(true);
@@ -127,21 +168,28 @@ function TabsShell() {
                 name={user ? 'person.fill' : 'rectangle.portrait.and.arrow.right'}
                 color={isOnProfile ? Colors[scheme].tint : Colors[scheme].tabIconDefault}
               />
-              <ThemedText
-                numberOfLines={1}
-                style={[
-                  styles.navLabel,
-                  { color: isOnProfile ? Colors[scheme].tint : Colors[scheme].tabIconDefault },
-                ]}>
-                {user ? 'Profile' : 'Sign / Login'}
-              </ThemedText>
+              {!crampedNav && (
+                <ThemedText
+                  numberOfLines={1}
+                  style={[
+                    styles.navLabel,
+                    { color: isOnProfile ? Colors[scheme].tint : Colors[scheme].tabIconDefault },
+                  ]}>
+                  {user ? 'Profile' : 'Sign in'}
+                </ThemedText>
+              )}
             </Pressable>
 
             <Pressable
               onPress={toggleThemeMode}
               style={[
                 styles.themeNavBtn,
-                { borderColor: Colors[scheme].icon, backgroundColor: Colors[scheme].surface },
+                {
+                  borderColor: Colors[scheme].icon,
+                  backgroundColor: Colors[scheme].surface,
+                  width: compactNav ? 34 : 38,
+                  height: compactNav ? 34 : 38,
+                },
               ]}
               accessibilityRole="button"
               accessibilityLabel="Toggle theme mode"
@@ -180,26 +228,25 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'space-between',
     height: '100%',
-    paddingHorizontal: 20,
+    gap: 8,
   },
   leftSection: {
-    width: 220,
+    flexShrink: 0,
     justifyContent: 'center',
     alignItems: 'flex-start',
   },
   centerSection: {
     flex: 1,
-    maxWidth: 560,
+    minWidth: 160,
     alignItems: 'center',
     justifyContent: 'center',
   },
   rightSection: {
-    width: 320,
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginLeft: 'auto',
-    gap: 8,
+    marginLeft: 8,
+    flexShrink: 0,
   },
   brand: {
     color: '#ea7a1f',
@@ -230,10 +277,8 @@ const styles = StyleSheet.create({
   navButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     paddingVertical: 6,
-    maxWidth: 170,
   },
   navLabel: {
     fontSize: 14,

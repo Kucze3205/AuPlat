@@ -187,6 +187,8 @@ GET /health  →  { "status": "ok", "timestamp": "..." }
 | `npm run android`   | Start on Android emulator          |
 | `npm run ios`       | Start on iOS simulator             |
 | `npm run web`       | Start in browser                   |
+| `npm run build:web` | Export static web app to `dist/`   |
+| `npm run deploy:web`| Build and deploy frontend hosting  |
 | `npm run lint`      | Run ESLint                         |
 
 ### Server (`server/`)
@@ -198,6 +200,21 @@ GET /health  →  { "status": "ok", "timestamp": "..." }
 | `npm start`      | Run compiled JS from `dist/`           |
 | `npm run seed`   | Seed Firestore with sample data        |
 | `npm run lint`   | Type-check without emitting            |
+
+---
+
+## Deployment (Clean Split)
+
+- Backend API: Firebase App Hosting (already configured in `server/`)
+- Frontend web: Firebase Hosting (root `firebase.json`, deploys `dist/`)
+
+Deploy frontend only:
+
+```bash
+npm run deploy:web
+```
+
+This does not redeploy your backend.
 
 ---
 

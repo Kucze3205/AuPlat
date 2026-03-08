@@ -18,7 +18,7 @@ import { auth } from '@/config/firebase';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { getErrorMessage, login, register, syncGoogleProfile, UserProfile } from '@/services/api';
-import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithCredential, signInWithPopup } from 'firebase/auth';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -94,6 +94,19 @@ export function AuthModal({ visible, onClose, onAuth }: Props) {
     try {
       setToastMsg(null);
 
+      if (Platform.OS === 'web') {
+        setGoogleLoading(true);
+
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+
+        await signInWithPopup(auth, provider);
+        const profile = await syncGoogleProfile(isRegister ? role : undefined);
+        onAuth(profile);
+        onClose();
+        return;
+      }
+
       if (!isGoogleConfigured) {
         setToastMsg(`Google login is not configured. Set ${requiredClientEnv} and restart Expo.`);
         return;
@@ -133,6 +146,11 @@ export function AuthModal({ visible, onClose, onAuth }: Props) {
       backgroundColor: scheme === 'dark' ? '#1e2022' : '#f9f9f9',
     },
   ];
+
+  const canUseGoogle =
+    Platform.OS === 'web'
+      ? !loading && !googleLoading
+      : !!request && isGoogleConfigured && !loading && !googleLoading;
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -200,11 +218,11 @@ export function AuthModal({ visible, onClose, onAuth }: Props) {
             style={[
               styles.googleBtn,
               {
-                opacity: request && isGoogleConfigured && !loading && !googleLoading ? 1 : 0.6,
+                opacity: canUseGoogle ? 1 : 0.6,
                 borderColor: Colors[scheme].icon,
               },
             ]}
-            disabled={!request || !isGoogleConfigured || loading || googleLoading}
+            disabled={!canUseGoogle}
             onPress={handleGoogleLogin}
           >
             {googleLoading ? (

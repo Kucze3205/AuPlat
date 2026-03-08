@@ -9,6 +9,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Platform } from 'react-native';
 
 const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
+const DEFAULT_DEPLOYED_API_URL = 'https://auction-plat-backend--auctionplat-58ded.us-central1.hosted.app';
 
 const withApiSuffix = (url: string): string => {
   const withoutTrailingSlash = url.replace(/\/+$/, '');
@@ -17,12 +18,9 @@ const withApiSuffix = (url: string): string => {
     : `${withoutTrailingSlash}/api`;
 };
 
-// Prefer explicit env config; fallback keeps local DX for emulator/simulator.
-const BASE_URL = configuredApiUrl
-  ? withApiSuffix(configuredApiUrl)
-  : Platform.OS === 'android'
-    ? 'http://10.0.2.2:3000/api'
-    : 'http://localhost:3000/api';
+// Prefer explicit env config. Fallback to deployed backend for reliability
+// on real devices and when Expo does not pick up local env changes yet.
+const BASE_URL = withApiSuffix(configuredApiUrl ?? DEFAULT_DEPLOYED_API_URL);
 
 // ── Error helpers ───────────────────────────────────
 
@@ -39,6 +37,10 @@ const firebaseErrorMessage = (code: string): string => {
     'auth/too-many-requests': 'Too many attempts. Please try again later.',
     'auth/network-request-failed': 'Network error. Check your connection.',
     'auth/operation-not-allowed': 'This sign-in method is not enabled.',
+    'auth/unauthorized-domain': 'This domain is not authorized for Firebase Auth. Add your hosting domain in Firebase Auth settings.',
+    'auth/popup-blocked': 'Popup was blocked by the browser. Allow popups and try again.',
+    'auth/popup-closed-by-user': 'Sign-in popup was closed before completing login.',
+    'auth/cancelled-popup-request': 'Another sign-in popup is already open.',
   };
   return map[code] ?? `Authentication error (${code}).`;
 };
@@ -46,7 +48,7 @@ const firebaseErrorMessage = (code: string): string => {
 /** Parse any error into a user-friendly message string. */
 export function getErrorMessage(error: unknown): string {
   if (error instanceof TypeError && error.message === 'Network request failed') {
-    return 'Cannot reach the server. Please check your connection and make sure the server is running.';
+    return `Cannot reach the server at ${BASE_URL}.`;
   }
   if (error && typeof error === 'object' && 'code' in error) {
     const code = (error as { code: string }).code;

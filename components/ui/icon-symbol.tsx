@@ -3,7 +3,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { SymbolViewProps, SymbolWeight } from 'expo-symbols';
 import { ComponentProps } from 'react';
-import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
+import { OpaqueColorValue, Platform, Text, type StyleProp, type TextStyle } from 'react-native';
 
 type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
 type IconSymbolName = keyof typeof MAPPING;
@@ -26,6 +26,19 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
 } as IconMapping;
 
+const WEB_FALLBACK_GLYPHS: Record<IconSymbolName, string> = {
+  'house.fill': '⌂',
+  'paperplane.fill': '➤',
+  'sun.max.fill': '☀',
+  'moon.fill': '☾',
+  'cart.fill': '🛒',
+  'tag.fill': '🏷',
+  'person.fill': '👤',
+  'rectangle.portrait.and.arrow.right': '↪',
+  'chevron.left.forwardslash.chevron.right': '</>',
+  'chevron.right': '›',
+};
+
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
  * This ensures a consistent look across platforms, and optimal resource usage.
@@ -43,5 +56,22 @@ export function IconSymbol({
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {
+  if (Platform.OS === 'web') {
+    return (
+      <Text
+        style={[
+          {
+            color: color as string,
+            fontSize: size,
+            lineHeight: size,
+            fontWeight: '700',
+          },
+          style,
+        ]}>
+        {WEB_FALLBACK_GLYPHS[name]}
+      </Text>
+    );
+  }
+
   return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
 }
