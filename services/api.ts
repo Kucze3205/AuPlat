@@ -1,9 +1,9 @@
 import { auth, storage } from '@/config/firebase';
 import {
-  User as FirebaseUser,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut
+    User as FirebaseUser,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut
 } from 'firebase/auth';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Platform } from 'react-native';

@@ -3,13 +3,13 @@ import * as Google from 'expo-auth-session/providers/google.js';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Modal,
+    Platform,
+    Pressable,
+    StyleSheet,
+    TextInput,
+    View,
 } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';

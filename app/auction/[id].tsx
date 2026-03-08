@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-  Alert,
+    Alert,
     Pressable,
     RefreshControl,
     ScrollView,
@@ -17,8 +17,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Toast } from '@/components/toast';
 import { Colors } from '@/constants/theme';
-import { useAuth } from '@/hooks/use-auth';
 import { useCart } from '@/hooks/cart';
+import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import {
     Auction,

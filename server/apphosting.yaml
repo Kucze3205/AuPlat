@@ -1,0 +1,3 @@
+env:
+  - variable: JWT_SECRET
+    secret: JWT_SECRET
