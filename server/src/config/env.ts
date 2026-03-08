@@ -1,6 +1,10 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+// Cloud Run/App Hosting provides environment variables directly.
+// Load .env only for local development.
+if (!process.env.K_SERVICE) {
+  dotenv.config();
+}
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
