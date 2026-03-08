@@ -1,0 +1,19 @@
+[debug] [2026-03-08T16:10:20.849Z] ----------------------------------------------------------------------
+[debug] [2026-03-08T16:10:20.851Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\kucze\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2026-03-08T16:10:20.851Z] CLI Version:   15.9.0
+[debug] [2026-03-08T16:10:20.851Z] Platform:      win32
+[debug] [2026-03-08T16:10:20.851Z] Node Version:  v24.13.0
+[debug] [2026-03-08T16:10:20.851Z] Time:          Sun Mar 08 2026 17:10:20 GMT+0100 (czas środkowoeuropejski standardowy)
+[debug] [2026-03-08T16:10:20.851Z] ----------------------------------------------------------------------
+[debug] 
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\kucze\Desktop\LearningJava\AuctionPlat\server
+

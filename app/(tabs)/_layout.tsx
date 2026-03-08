@@ -3,6 +3,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { AuctionSearchProvider, useAuctionSearch } from '@/hooks/auction-search';
+import { useCart } from '@/hooks/cart';
 import { useThemeMode } from '@/hooks/theme-mode';
 import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -25,115 +26,137 @@ function TabsShell() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, setUser } = useAuth();
+  const { itemCount } = useCart();
   const { searchInput, setSearchInput, applySearch, clearSearch } = useAuctionSearch();
   const [showAuth, setShowAuth] = useState(false);
   const shellWidth = Math.min(Math.max(width - 24, 320), 1200);
-  const shellLeft = Math.max((width - shellWidth) / 2, 0);
-  const headerSlot =
-    shellWidth >= 1100 ? 700 : shellWidth >= 900 ? 600 : shellWidth >= 700 ? 460 : 280;
+
   const toggleThemeMode = () => {
     setThemeMode(themeMode === 'light' ? 'dark' : 'light');
   };
+
   const isOnProfile = pathname?.includes('/profile');
+  const isOnCart = pathname?.includes('/cart');
 
   return (
     <View style={styles.container}>
       <View
         style={[
-          styles.marketHeader,
-          {
-            borderBottomColor: Colors[scheme].icon,
-            backgroundColor: Colors[scheme].surface,
-            left: shellLeft,
-            width: headerSlot,
-          },
-        ]}>
-        <Pressable
-          onPress={() => {
-            clearSearch();
-            router.replace('/(tabs)');
-          }}>
-          <ThemedText style={styles.brand}>Auction</ThemedText>
-        </Pressable>
-        <View style={styles.searchRow}>
-          <TextInput
-            style={[
-              styles.searchInput,
-              {
-                color: Colors[scheme].text,
-                borderColor: Colors[scheme].icon,
-                backgroundColor: Colors[scheme].background,
-              },
-            ]}
-            placeholder="Search auctions"
-            placeholderTextColor={Colors[scheme].icon}
-            value={searchInput}
-            onChangeText={setSearchInput}
-            onSubmitEditing={applySearch}
-            returnKeyType="search"
-          />
-          <Pressable
-            style={({ pressed }) => [styles.searchBtn, { opacity: pressed ? 0.85 : 1 }]}
-            onPress={applySearch}>
-            <ThemedText style={styles.searchBtnText}>Search</ThemedText>
-          </Pressable>
-        </View>
-      </View>
-
-      <View
-        style={[
-          styles.navBar,
+          styles.topBar,
           {
             borderBottomColor: Colors[scheme].icon,
             backgroundColor: Colors[scheme].surface,
             left: 0,
             right: 0,
-            paddingLeft: shellLeft + headerSlot,
-            paddingRight: 58,
           },
         ]}>
+        <View style={[styles.topBarInner, { width: shellWidth }]}>
+          <View style={styles.leftSection}>
+            <Pressable
+              onPress={() => {
+                clearSearch();
+                router.replace('/(tabs)');
+              }}>
+              <ThemedText style={styles.brand}>Auction</ThemedText>
+            </Pressable>
+          </View>
 
-        <Pressable
-          style={styles.navButton}
-          onPress={() => {
-            if (!user) {
-              setShowAuth(true);
-              return;
-            }
-            router.replace('/(tabs)/profile');
-          }}>
-          <IconSymbol
-            size={22}
-            name={user ? 'person.fill' : 'rectangle.portrait.and.arrow.right'}
-            color={isOnProfile ? Colors[scheme].tint : Colors[scheme].tabIconDefault}
-          />
-          <ThemedText
-            style={[
-              styles.navLabel,
-              { color: isOnProfile ? Colors[scheme].tint : Colors[scheme].tabIconDefault },
-            ]}>
-            {user ? 'Profile' : 'Sign / Login'}
-          </ThemedText>
-        </Pressable>
+          <View style={styles.centerSection}>
+            <View style={styles.searchRow}>
+              <TextInput
+                style={[
+                  styles.searchInput,
+                  {
+                    color: Colors[scheme].text,
+                    borderColor: Colors[scheme].icon,
+                    backgroundColor: Colors[scheme].background,
+                  },
+                ]}
+                placeholder="Search auctions"
+                placeholderTextColor={Colors[scheme].icon}
+                value={searchInput}
+                onChangeText={setSearchInput}
+                onSubmitEditing={applySearch}
+                returnKeyType="search"
+              />
+              <Pressable
+                style={({ pressed }) => [styles.searchBtn, { opacity: pressed ? 0.85 : 1 }]}
+                onPress={applySearch}>
+                <ThemedText style={styles.searchBtnText}>Search</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+
+          <View style={styles.rightSection}>
+            <Pressable
+              style={styles.navButton}
+              onPress={() => router.replace('/(tabs)/cart')}>
+              <View style={styles.cartIconWrap}>
+                <IconSymbol
+                  size={22}
+                  name="cart.fill"
+                  color={isOnCart ? Colors[scheme].tint : Colors[scheme].tabIconDefault}
+                />
+                {itemCount > 0 && (
+                  <View style={styles.cartBadge}>
+                    <ThemedText style={styles.cartBadgeText}>{itemCount > 99 ? '99+' : itemCount}</ThemedText>
+                  </View>
+                )}
+              </View>
+              <ThemedText
+                numberOfLines={1}
+                style={[
+                  styles.navLabel,
+                  { color: isOnCart ? Colors[scheme].tint : Colors[scheme].tabIconDefault },
+                ]}>
+                Basket
+              </ThemedText>
+            </Pressable>
+
+            <Pressable
+              style={styles.navButton}
+              onPress={() => {
+                if (!user) {
+                  setShowAuth(true);
+                  return;
+                }
+                router.replace('/(tabs)/profile');
+              }}>
+              <IconSymbol
+                size={22}
+                name={user ? 'person.fill' : 'rectangle.portrait.and.arrow.right'}
+                color={isOnProfile ? Colors[scheme].tint : Colors[scheme].tabIconDefault}
+              />
+              <ThemedText
+                numberOfLines={1}
+                style={[
+                  styles.navLabel,
+                  { color: isOnProfile ? Colors[scheme].tint : Colors[scheme].tabIconDefault },
+                ]}>
+                {user ? 'Profile' : 'Sign / Login'}
+              </ThemedText>
+            </Pressable>
+
+            <Pressable
+              onPress={toggleThemeMode}
+              style={[
+                styles.themeNavBtn,
+                { borderColor: Colors[scheme].icon, backgroundColor: Colors[scheme].surface },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Toggle theme mode"
+            >
+              <IconSymbol
+                size={18}
+                name={themeMode === 'light' ? 'moon.fill' : 'sun.max.fill'}
+                color={Colors[scheme].tint}
+              />
+            </Pressable>
+          </View>
+        </View>
       </View>
 
       <Slot />
-
-      <Pressable
-        onPress={toggleThemeMode}
-        style={[
-          styles.themeNavBtn,
-          { borderColor: Colors[scheme].icon, backgroundColor: Colors[scheme].surface },
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel="Toggle theme mode"
-      >
-        <IconSymbol
-          size={18}
-          name={themeMode === 'light' ? 'moon.fill' : 'sun.max.fill'}
-          color={Colors[scheme].tint}
-        />
-      </Pressable>
 
       <AuthModal visible={showAuth} onClose={() => setShowAuth(false)} onAuth={setUser} />
     </View>
@@ -142,16 +165,41 @@ function TabsShell() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  marketHeader: {
+  topBar: {
     position: 'absolute',
     top: 0,
-    zIndex: 2,
-    flexDirection: 'row',
+    zIndex: 4,
     alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 20,
+    justifyContent: 'center',
     height: 56,
     borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  topBarInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    justifyContent: 'space-between',
+    height: '100%',
+    paddingHorizontal: 20,
+  },
+  leftSection: {
+    width: 220,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  centerSection: {
+    flex: 1,
+    maxWidth: 560,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rightSection: {
+    width: 320,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginLeft: 'auto',
+    gap: 8,
   },
   brand: {
     color: '#ea7a1f',
@@ -161,7 +209,7 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     minWidth: 98,
   },
-  searchRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  searchRow: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 8 },
   searchInput: {
     flex: 1,
     borderWidth: 1,
@@ -179,21 +227,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   searchBtnText: { color: '#fff', fontSize: 14, fontWeight: '700', letterSpacing: 0.3 },
-  navBar: {
-    position: 'absolute',
-    top: 0,
-    height: 56,
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    gap: 20,
-    zIndex: 1,
-  },
   navButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    paddingHorizontal: 8,
     paddingVertical: 6,
     maxWidth: 170,
   },
@@ -201,16 +239,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  themeNavBtn: {
+  cartIconWrap: {
+    position: 'relative',
+  },
+  cartBadge: {
     position: 'absolute',
-    top: 9,
-    right: 12,
+    top: -7,
+    right: -11,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#ea7a1f',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  cartBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    lineHeight: 12,
+    fontWeight: '700',
+  },
+  themeNavBtn: {
     width: 38,
     height: 38,
     borderRadius: 3,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 4,
   },
 });

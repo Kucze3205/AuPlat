@@ -5,6 +5,7 @@ import 'react-native-reanimated';
 
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Colors } from '@/constants/theme';
+import { CartProvider } from '@/hooks/cart';
 import { ThemeModeProvider } from '@/hooks/theme-mode';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -15,7 +16,9 @@ export const unstable_settings = {
 export default function RootLayout() {
   return (
     <ThemeModeProvider>
-      <AppShell />
+      <CartProvider>
+        <AppShell />
+      </CartProvider>
     </ThemeModeProvider>
   );
 }

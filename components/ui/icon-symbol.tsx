@@ -18,6 +18,7 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'sun.max.fill': 'wb-sunny',
   'moon.fill': 'dark-mode',
+  'cart.fill': 'shopping-cart',
   'tag.fill': 'sell',
   'person.fill': 'person',
   'rectangle.portrait.and.arrow.right': 'login',

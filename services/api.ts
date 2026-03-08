@@ -293,6 +293,23 @@ export async function updateAuction(id: string, payload: UpdateAuctionPayload): 
   return data.auction;
 }
 
+export async function deleteAuction(id: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/auctions/auction/${id}`, {
+    method: 'DELETE',
+    headers: await headers(),
+  });
+
+  if (!res.ok) {
+    let err: { message?: string; errors?: { path: string; message: string }[] } | null = null;
+    try {
+      err = await res.json();
+    } catch {
+      err = null;
+    }
+    throw new Error(formatApiError(err ?? {}, 'Failed to delete auction'));
+  }
+}
+
 export async function placeBid(auctionId: string, amount: number): Promise<Auction> {
   const res = await fetch(`${BASE_URL}/auctions/auction/${auctionId}/bid`, {
     method: 'POST',

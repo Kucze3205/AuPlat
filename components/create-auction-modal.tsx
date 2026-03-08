@@ -124,7 +124,7 @@ export function CreateAuctionModal({ visible, onClose, onCreated }: Props) {
           </View>
         </View>
       </View>
-      <Toast message={toastMsg} onDismiss={() => setToastMsg(null)} />
+      <Toast type="error" message={toastMsg} onDismiss={() => setToastMsg(null)} />
     </Modal>
   );
 }

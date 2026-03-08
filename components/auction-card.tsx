@@ -10,9 +10,11 @@ import type { Auction } from '@/services/api';
 interface Props {
   auction: Auction;
   onPress: () => void;
+  onAddToCart?: () => void;
+  inCart?: boolean;
 }
 
-export function AuctionCard({ auction, onPress }: Props) {
+export function AuctionCard({ auction, onPress, onAddToCart, inCart = false }: Props) {
   const scheme = useColorScheme() ?? 'light';
   const endsAt = new Date(auction.endsAt);
   const isEnded = endsAt.getTime() < Date.now();
@@ -21,7 +23,6 @@ export function AuctionCard({ auction, onPress }: Props) {
     <Pressable
       onPress={onPress}
       style={[styles.card, { backgroundColor: Colors[scheme].background, borderColor: Colors[scheme].icon }]}
-      accessibilityRole="button"
     >
       <View style={styles.body}>
         <View style={styles.info}>
@@ -42,6 +43,22 @@ export function AuctionCard({ auction, onPress }: Props) {
           <ThemedText style={styles.bidCount}>
             {auction.bids.length} bid{auction.bids.length !== 1 ? 's' : ''}
           </ThemedText>
+
+          {onAddToCart && (
+            <Pressable
+              style={({ pressed }) => [
+                styles.cartBtn,
+                { opacity: pressed ? 0.85 : 1, backgroundColor: inCart ? '#5e676f' : '#ea7a1f' },
+              ]}
+              onPress={(event) => {
+                event.stopPropagation();
+                onAddToCart();
+              }}
+              accessibilityRole="button"
+            >
+              <ThemedText style={styles.cartBtnText}>{inCart ? 'In basket' : 'Add to basket'}</ThemedText>
+            </Pressable>
+          )}
         </View>
         {auction.imageUrl && (
           <Image source={{ uri: auction.imageUrl }} style={styles.image} contentFit="contain" />
@@ -60,4 +77,16 @@ const styles = StyleSheet.create({
   desc: { opacity: 0.7 },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
   bidCount: { fontSize: 13, opacity: 0.5 },
+  cartBtn: {
+    alignSelf: 'flex-start',
+    borderRadius: 3,
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  cartBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 13,
+  },
 });

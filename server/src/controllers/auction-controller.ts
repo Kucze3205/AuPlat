@@ -103,6 +103,28 @@ export const updateAuction = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+export const deleteAuction = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      throw new HttpError(401, 'Unauthorized');
+    }
+    if (!req.params.id) {
+      throw new HttpError(400, 'Auction id is required');
+    }
+
+    const auction = await ensureAuction(req.params.id as string);
+
+    if ((auction as any).sellerId !== req.user.userId) {
+      throw new HttpError(403, 'You can only delete your own auctions');
+    }
+
+    await auctionsCol.doc(req.params.id as string).delete();
+    return res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const myAuctions = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {

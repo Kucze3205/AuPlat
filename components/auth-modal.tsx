@@ -3,13 +3,13 @@ import * as Google from 'expo-auth-session/providers/google.js';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Modal,
-    Platform,
-    Pressable,
-    StyleSheet,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
 } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -66,6 +66,8 @@ export function AuthModal({ visible, onClose, onAuth }: Props) {
     webClientId: googleWebClientId || 'missing-web-client-id',
     androidClientId: googleAndroidClientId || 'missing-android-client-id',
     iosClientId: googleIosClientId || 'missing-ios-client-id',
+    responseType: 'token',
+    scopes: ['openid', 'profile', 'email'],
     redirectUri,
   });
 
@@ -105,11 +107,12 @@ export function AuthModal({ visible, onClose, onAuth }: Props) {
       }
 
       const idToken = result.authentication?.idToken ?? result.params?.id_token;
-      if (!idToken) {
-        throw new Error('Google login failed: missing ID token.');
+      const accessToken = result.authentication?.accessToken ?? result.params?.access_token;
+      if (!idToken && !accessToken) {
+        throw new Error('Google login failed: missing OAuth token.');
       }
 
-      const credential = GoogleAuthProvider.credential(idToken);
+      const credential = GoogleAuthProvider.credential(idToken ?? null, accessToken ?? null);
       await signInWithCredential(auth, credential);
 
       const profile = await syncGoogleProfile(isRegister ? role : undefined);
@@ -218,7 +221,7 @@ export function AuthModal({ visible, onClose, onAuth }: Props) {
           </Pressable>
         </View>
       </View>
-      <Toast message={toastMsg} onDismiss={() => setToastMsg(null)} />
+      <Toast type="error" message={toastMsg} onDismiss={() => setToastMsg(null)} />
     </Modal>
   );
 }

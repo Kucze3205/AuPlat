@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
+  Alert,
     Pressable,
     RefreshControl,
     ScrollView,
@@ -17,9 +18,11 @@ import { ThemedView } from '@/components/themed-view';
 import { Toast } from '@/components/toast';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
+import { useCart } from '@/hooks/cart';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import {
     Auction,
+    deleteAuction,
     fetchAuction,
     getErrorMessage,
     placeBid,
@@ -27,8 +30,10 @@ import {
 
 export default function AuctionDetailsScreen() {
   const scheme = useColorScheme() ?? 'light';
+  const router = useRouter();
   const { id: auctionId } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
+  const { addToCart, isInCart } = useCart();
 
   const [auction, setAuction] = useState<Auction | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +43,7 @@ export default function AuctionDetailsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showEdit, setShowEdit] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const loadAuction = useCallback(async () => {
     if (!auctionId) {
@@ -115,7 +121,7 @@ export default function AuctionDetailsScreen() {
             Retry
           </ThemedText>
         </Pressable>
-        <Toast message={error} onDismiss={() => setError(null)} />
+        <Toast type="error" message={error} onDismiss={() => setError(null)} />
       </ThemedView>
     );
   }
@@ -125,6 +131,40 @@ export default function AuctionDetailsScreen() {
   const isEnded = endsAt.getTime() < Date.now();
   const canBid = !!user && user.id !== auction.sellerId && user.role === 'buyer' && !isEnded;
   const isOwner = !!user && user.id === auction.sellerId;
+  const alreadyInCart = isInCart(auction.id);
+
+  const handleAddToBasket = () => {
+    addToCart(auction);
+    setSuccess(`Added "${auction.title}" to basket.`);
+  };
+
+  const confirmDeleteAuction = () => {
+    if (!auction || !auctionId || deleting) return;
+
+    Alert.alert(
+      'Delete auction?',
+      'This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              setError(null);
+              await deleteAuction(auctionId);
+              router.replace('/(tabs)');
+            } catch (e) {
+              setError(getErrorMessage(e));
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const bidInputStyle = [
     styles.bidInput,
@@ -150,12 +190,24 @@ export default function AuctionDetailsScreen() {
         </ThemedText>
 
         {isOwner && (
-          <Pressable
-            style={[styles.button, styles.editButton]}
-            onPress={() => setShowEdit(true)}
-          >
-            <ThemedText type="defaultSemiBold" style={{ color: '#fff' }}>Edit Auction</ThemedText>
-          </Pressable>
+          <View style={styles.ownerActionsRow}>
+            <Pressable
+              style={[styles.button, styles.editButton]}
+              onPress={() => setShowEdit(true)}
+            >
+              <ThemedText type="defaultSemiBold" style={{ color: '#fff' }}>Edit Auction</ThemedText>
+            </Pressable>
+
+            <Pressable
+              style={[styles.button, styles.deleteButton, { opacity: deleting ? 0.65 : 1 }]}
+              onPress={confirmDeleteAuction}
+              disabled={deleting}
+            >
+              <ThemedText type="defaultSemiBold" style={{ color: '#fff' }}>
+                {deleting ? 'Deleting...' : 'Delete Auction'}
+              </ThemedText>
+            </Pressable>
+          </View>
         )}
 
         <ThemedText style={styles.description}>{auction.description}</ThemedText>
@@ -164,6 +216,19 @@ export default function AuctionDetailsScreen() {
           <ThemedText type="subtitle">Current price</ThemedText>
           <ThemedText type="subtitle">${auction.currentPrice.toFixed(2)}</ThemedText>
         </View>
+
+        <Pressable
+          style={[
+            styles.button,
+            styles.cartButton,
+            { backgroundColor: alreadyInCart ? '#5e676f' : '#ea7a1f' },
+          ]}
+          onPress={handleAddToBasket}
+        >
+          <ThemedText type="defaultSemiBold" style={styles.bidButtonText}>
+            {alreadyInCart ? 'In basket' : 'Add to basket'}
+          </ThemedText>
+        </Pressable>
 
         <View style={styles.metaCard}>
           <View style={styles.metaRow}>
@@ -246,7 +311,7 @@ export default function AuctionDetailsScreen() {
         {success && <ThemedText style={styles.successText}>{success}</ThemedText>}
       </ScrollView>
 
-      <Toast message={error} onDismiss={() => setError(null)} />
+      <Toast type="error" message={error} onDismiss={() => setError(null)} />
 
       {auction && (
         <EditAuctionModal
@@ -349,6 +414,17 @@ const styles = StyleSheet.create({
   },
   editButton: {
     backgroundColor: '#ea7a1f',
+  },
+  ownerActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignSelf: 'flex-start',
+    flexWrap: 'wrap',
+  },
+  deleteButton: {
+    backgroundColor: '#c0392b',
+  },
+  cartButton: {
     alignSelf: 'flex-start',
   },
   bidButtonText: {

@@ -4,6 +4,7 @@ import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 interface Props {
   message: string | null;
+  type?: 'success' | 'error';
   /** Auto-dismiss after this many ms (default 4000) */
   duration?: number;
   onDismiss: () => void;
@@ -13,7 +14,7 @@ interface Props {
  * A toast that slides up from the bottom, stays visible for a few seconds,
  * then slides back down automatically. Tap to dismiss early.
  */
-export function Toast({ message, duration = 4000, onDismiss }: Props) {
+export function Toast({ message, type = 'error', duration = 4000, onDismiss }: Props) {
   const translateY = useRef(new Animated.Value(120)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -43,12 +44,16 @@ export function Toast({ message, duration = 4000, onDismiss }: Props) {
 
   if (!message) return null;
 
+  const isSuccess = type === 'success';
+
   return (
     <View style={styles.wrapper} pointerEvents="box-none">
       <Animated.View style={[styles.container, { transform: [{ translateY }], opacity }]}>
-        <Pressable onPress={hide} style={styles.inner}>
-          <ThemedText style={styles.icon}>⚠</ThemedText>
-          <ThemedText style={styles.message}>{message}</ThemedText>
+        <Pressable onPress={hide} style={[styles.inner, isSuccess ? styles.innerSuccess : styles.innerError]}>
+          <ThemedText style={[styles.icon, isSuccess ? styles.iconSuccess : styles.iconError]}>
+            {isSuccess ? '✓' : '⚠'}
+          </ThemedText>
+          <ThemedText style={[styles.message, isSuccess ? styles.messageSuccess : styles.messageError]}>{message}</ThemedText>
         </Pressable>
       </Animated.View>
     </View>
@@ -69,7 +74,6 @@ const styles = StyleSheet.create({
     minWidth: '60%',
   },
   inner: {
-    backgroundColor: '#1e1e2e',
     borderRadius: 4,
     paddingVertical: 14,
     paddingHorizontal: 18,
@@ -82,14 +86,31 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
+  innerError: {
+    backgroundColor: '#1e1e2e',
+  },
+  innerSuccess: {
+    backgroundColor: '#102615',
+  },
   icon: {
     fontSize: 18,
     marginTop: 1,
   },
-  message: {
+  iconError: {
     color: '#fca5a5',
+  },
+  iconSuccess: {
+    color: '#86efac',
+  },
+  message: {
     fontSize: 14,
     lineHeight: 20,
     flex: 1,
+  },
+  messageError: {
+    color: '#fca5a5',
+  },
+  messageSuccess: {
+    color: '#86efac',
   },
 });

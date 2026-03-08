@@ -155,7 +155,7 @@ export function EditAuctionModal({ visible, auction, onClose, onUpdated }: Props
           </View>
         </View>
       </View>
-      <Toast message={toastMsg} onDismiss={() => setToastMsg(null)} />
+      <Toast type="error" message={toastMsg} onDismiss={() => setToastMsg(null)} />
     </Modal>
   );
 }
