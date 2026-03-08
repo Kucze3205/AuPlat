@@ -5,6 +5,7 @@ import { errorHandler } from './middleware/error-handler.js';
 import routes from './routes/index.js';
 
 const app = express();
+const host = '0.0.0.0';
 
 app.use(cors());
 app.use(express.json());
@@ -16,6 +17,6 @@ app.get('/health', (_req, res) => {
 app.use('/api', routes);
 app.use(errorHandler);
 
-app.listen(env.port, () => {
-  console.log(`Auction server running on port ${env.port}`);
+app.listen(env.port, host, () => {
+  console.log(`Auction server running on ${host}:${env.port}`);
 });
