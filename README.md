@@ -160,6 +160,42 @@ scripts:
 	runCommand: node dist/index.js
 ```
 
+## Security: Service Account Credential Rotation
+
+If a service account key is leaked or disabled, rotate immediately.
+
+1. Re-enable or recreate the service account (in Cloud Console or Cloud Shell).
+2. Create a new key.
+3. Update runtime secret/env to use the new key.
+4. Delete old keys.
+5. Remove old key files from git tracking and add ignore rules.
+
+Example commands (Cloud Shell with `gcloud`):
+
+```bash
+PROJECT_ID=auctionplat-58ded
+SA_EMAIL=firebase-adminsdk-fbsvc@auctionplat-58ded.iam.gserviceaccount.com
+
+# optional: if the service account is disabled
+gcloud iam service-accounts enable "$SA_EMAIL" --project "$PROJECT_ID"
+
+# create a replacement key
+gcloud iam service-accounts keys create ./new-service-account.json \
+	--iam-account "$SA_EMAIL" \
+	--project "$PROJECT_ID"
+
+# list keys and delete old/compromised key(s)
+gcloud iam service-accounts keys list \
+	--iam-account "$SA_EMAIL" \
+	--project "$PROJECT_ID"
+
+gcloud iam service-accounts keys delete OLD_KEY_ID \
+	--iam-account "$SA_EMAIL" \
+	--project "$PROJECT_ID" --quiet
+```
+
+Recommended: use App Hosting runtime identity (ADC) in production and avoid storing JSON key files in the repository.
+
 ## License
 
 MIT

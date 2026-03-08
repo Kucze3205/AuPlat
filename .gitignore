@@ -14,8 +14,6 @@ expo-env.d.ts
 *.orig.*
 *.jks
 *.p8
-*.p12
-*.key
 *.mobileprovision
 
 # Metro
@@ -28,15 +26,53 @@ yarn-error.*
 
 # macOS
 .DS_Store
-*.pem
 
 # local env files
 .env*.local
 .env
 .env.*
+!.env.example
+!.env.template
 server/.env
 server/.env.*
 !server/.env.example
+
+# service account credentials (never commit)
+*-firebase-adminsdk-*.json
+*service-account*.json
+
+# cloud credentials and secret files
+*credentials*.json
+*keyfile*.json
+*secret*.json
+*.secrets
+*.secret
+
+# private keys / certificates
+*.pem
+*.key
+*.pfx
+*.p12
+*.p7b
+*.p7c
+*.cer
+*.crt
+*.der
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+# local auth/token files
+.npmrc
+.pypirc
+.netrc
+.aws/
+.azure/
+.gcp/
+.terraform/
+terraform.tfvars
+terraform.tfvars.json
 
 # typescript
 *.tsbuildinfo
