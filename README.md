@@ -82,6 +82,14 @@ FIREBASE_SERVICE_ACCOUNT=
 
 Make sure your Firebase service-account JSON (`auctionplat-*-firebase-adminsdk-*.json`) is in the project root, or set the env variable above.
 
+Create a root `.env` (for Expo client):
+
+```env
+# Use deployed backend in production/web builds.
+# Local fallback remains localhost/10.0.2.2 if this is omitted.
+EXPO_PUBLIC_API_URL=https://auction-plat-backend--auctionplat-58ded.us-central1.hosted.app
+```
+
 ### 3. Start the server
 
 ```bash

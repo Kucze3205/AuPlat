@@ -8,9 +8,19 @@ import {
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Platform } from 'react-native';
 
-// Android emulator uses 10.0.2.2 to reach host localhost
-const BASE_URL =
-  Platform.OS === 'android'
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
+
+const withApiSuffix = (url: string): string => {
+  const withoutTrailingSlash = url.replace(/\/+$/, '');
+  return withoutTrailingSlash.endsWith('/api')
+    ? withoutTrailingSlash
+    : `${withoutTrailingSlash}/api`;
+};
+
+// Prefer explicit env config; fallback keeps local DX for emulator/simulator.
+const BASE_URL = configuredApiUrl
+  ? withApiSuffix(configuredApiUrl)
+  : Platform.OS === 'android'
     ? 'http://10.0.2.2:3000/api'
     : 'http://localhost:3000/api';
 
